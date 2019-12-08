@@ -1,0 +1,73 @@
+package session
+
+import (
+	"encoding/json"
+	"log"
+)
+
+func copyPorts(in *map[string]int64) (out map[string]int64) {
+	out = make(map[string]int64)
+	for k, v := range *in {
+		out[k] = v
+	}
+	return out
+}
+
+func reduce(state *State, action *UnionEvent) *State {
+	sessions := make(map[string]Session)
+	for k, v := range state.Sessions {
+		sessions[k] = v
+	}
+
+	var err error
+
+	switch action.Type {
+	case "session-initialized":
+		sessionInit := new(SessionInitializedEventPayload)
+		err = json.Unmarshal(*action.Payload, sessionInit)
+
+		if err == nil {
+			for _, session := range sessionInit.Sessions {
+				sessions[session.ID] = Session{
+					ID:       session.ID,
+					Image:    session.Image,
+					Location: session.Location,
+					Host:     session.Host,
+					Created:  session.Created,
+					Port:     copyPorts(&session.Port),
+				}
+			}
+		} else {
+			log.Printf("session.reduce.session-initialized could not unmarshal; %v", err)
+		}
+
+	case "session-started":
+		sessionStarted := new(SessionStartedEventPayload)
+		err = json.Unmarshal(*action.Payload, sessionStarted)
+
+		if err == nil {
+			sessions[sessionStarted.Session.ID] = Session{
+				ID:       sessionStarted.Session.ID,
+				Image:    sessionStarted.Session.Image,
+				Location: sessionStarted.Session.Location,
+				Host:     sessionStarted.Session.Host,
+				Created:  sessionStarted.Session.Created,
+				Port:     copyPorts(&sessionStarted.Session.Port),
+			}
+		} else {
+			log.Printf("session.reduce.session-started could not unmarshal; %v", err)
+		}
+
+	case "session-stopped":
+		sessionStopped := new(SessionStoppedEventPayload)
+		err = json.Unmarshal(*action.Payload, sessionStopped)
+
+		if err == nil {
+			delete(sessions, sessionStopped.Session.ID)
+		} else {
+			log.Printf("session.reduce.session-stopped could not unmarshal; %v", err)
+		}
+	}
+
+	return NewStateWithSessions(sessions)
+}

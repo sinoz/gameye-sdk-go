@@ -1,11 +1,11 @@
 package main
 
 import (
-	"../pkg/client"
-	"../pkg/client/logs"
-	"../pkg/client/session"
-	"../pkg/client/statistics"
 	"fmt"
+	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client"
+	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/logs"
+	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/session"
+	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/statistics"
 	"github.com/google/uuid"
 	"io"
 	"log"
@@ -13,8 +13,6 @@ import (
 )
 
 func main() {
-	var err error
-
 	config := client.GameyeClientConfig{
 		Endpoint: "",
 		Token:    "",
@@ -27,7 +25,7 @@ func main() {
 
 	var activeSession = make(chan session.Session)
 	log.Printf("Subscribing to session events %v\n", sessionID)
-	onSessionState := func(state session.State) {
+	onSessionState := func(state *session.State) {
 		foundSession := session.SelectSession(state, sessionID)
 		if foundSession.ID != "" {
 			log.Printf("Match Ready! %v", foundSession)
@@ -51,21 +49,21 @@ func main() {
 	handleErr(err)
 
 	currentLine := 0
-	var allLogs []logs.LogLine
-	onLogState := func(state logs.State) {
-		newLogs := logs.SelectLogsSince(state, currentLine)
+	var allLogs []logs.Entry
+	onLogState := func(state *logs.State) {
+		newLogs := logs.SelectSince(state, currentLine)
 		for _, v := range newLogs {
 			log.Printf("%d: %s", v.LineKey, v.Payload)
 		}
 		currentLine += len(newLogs)
-		allLogs = logs.SelectAllLogs(state)
+		allLogs = logs.SelectAll(state)
 	}
 
 	err = client.SubscribeLogEvents(gameyeClient, sessionID, onLogState)
 	handleErr(err)
 
 	rawStats := ""
-	onStatisticsState := func(state statistics.State) {
+	onStatisticsState := func(state *statistics.State) {
 		statistics.SelectPlayerList(state)
 		rawStats, err = statistics.SelectRawStatistics(state)
 		handleErr(err)
