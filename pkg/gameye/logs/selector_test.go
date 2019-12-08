@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/helper"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/helper"
 	"github.com/stretchr/testify/assert"
 )
 

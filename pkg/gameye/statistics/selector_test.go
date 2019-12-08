@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/helper"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/helper"
 )
 
 func readStats() (result map[string]interface{}) {

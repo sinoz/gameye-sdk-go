@@ -1,7 +1,7 @@
 package logs
 
 import (
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/patch"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/patch"
 )
 
 // OnData is a callback type used for events

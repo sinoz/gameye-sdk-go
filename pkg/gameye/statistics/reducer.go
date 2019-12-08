@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/patch"
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/helper"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/patch"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/helper"
 )
 
 func convertPath(inPath []interface{}) (outPath []string) {

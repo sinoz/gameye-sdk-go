@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client"
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/logs"
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/session"
-	"github.com/Gameye/gameye-sdk-go/pkg/go-sdk/client/statistics"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/logs"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/session"
+	"github.com/Gameye/gameye-sdk-go/pkg/gameye/statistics"
 	"github.com/google/uuid"
 	"io"
 	"log"
@@ -13,12 +13,12 @@ import (
 )
 
 func main() {
-	config := client.GameyeClientConfig{
+	config := gameye.ClientConfig{
 		Endpoint: "",
 		Token:    "",
 	}
 
-	gameyeClient, err := client.NewGameyeClient(config)
+	client, err := gameye.NewClient(config)
 	handleErr(err)
 
 	sessionID := uuid.New().String()
@@ -33,12 +33,11 @@ func main() {
 		activeSession <- foundSession
 	}
 
-	err = client.SubscribeSessionEvents(gameyeClient, onSessionState)
+	err = client.SubscribeSessionEvents(onSessionState)
 	handleErr(err)
 
 	log.Printf("Starting Match %v\n", sessionID)
 	err = client.StartMatch(
-		gameyeClient,
 		sessionID,
 		"csgo-dem",
 		[]string{"frankfurt"},
@@ -59,7 +58,7 @@ func main() {
 		allLogs = logs.SelectAll(state)
 	}
 
-	err = client.SubscribeLogEvents(gameyeClient, sessionID, onLogState)
+	err = client.SubscribeLogEvents(sessionID, onLogState)
 	handleErr(err)
 
 	rawStats := ""
@@ -69,7 +68,7 @@ func main() {
 		handleErr(err)
 	}
 
-	err = client.SubscribeStatisticsEvents(gameyeClient, sessionID, onStatisticsState)
+	err = client.SubscribeStatisticsEvents(sessionID, onStatisticsState)
 	handleErr(err)
 
 	// Wait for a session to not be empty
